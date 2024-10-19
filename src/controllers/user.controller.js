@@ -4,6 +4,22 @@ import {User} from "../models/user.model.js"
 import {uploadToCloudinary} from '../utils/cloudinary.js'
 import {ApiResponse} from '../utils/ApiResponse.js'
 
+const generateRefreshAndAccessToken = async(userId) =>{
+    try {
+        const user =await User.findById(userId)
+        const accessToken = user.accessTokenGen
+        const refreshToken = user.refreshTokenGen
+
+        user.refreshToken = refreshToken
+        await user.save({validateBeforeSave : true})
+
+        return {accessToken,refreshToken}
+        
+    } catch (error) {
+        throw new ApiError(500,"Error while generating Tokens")
+    }
+}
+
 const registerUser = asyncHandler( async(req,res) =>{
     const {username , fullname , email , password} = req.body;
     if([username,fullname,email,password].some((field)=>field?.trim()==="")){
@@ -52,4 +68,43 @@ const registerUser = asyncHandler( async(req,res) =>{
     )
 })
 
-export {registerUser}
+const loginUser = asyncHandler( async (req,res) => {
+    const{email,username,password}=req.body
+    if(!username || !email){
+        throw new ApiError(400,"username or email is required for login")
+    }
+    const user = User.findOne({
+        $or:[{email},{username}]
+    })
+    if(!user){
+        throw new ApiError(404,"User doesnot exists")
+    }
+    const isPassValid = await user.isPasswordCorrect(password)
+
+    if(!isPassValid) throw new ApiError(407,"Credentials donot match")
+
+    const {accessToken , refreshToken} = generateRefreshAndAccessToken(user._id)
+
+    const loggedUser = await User.findById(user._id).select("-password -refreshToken")
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(
+        new ApiResponse(200,{
+            user:loggedUser , accessToken , refreshToken
+        },"User Logged in successfully")
+    )
+
+})
+
+const logoutUser = asyncHandler( async (req,res) => {
+    
+})
+
+export {registerUser,loginUser,logoutUser}
