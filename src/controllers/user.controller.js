@@ -106,8 +106,8 @@ const loginUser = asyncHandler( async (req,res) => {
 
 const logoutUser = asyncHandler( async (req,res) => {
     const user =await User.findByIdAndUpdate(req.user._id,{
-        $set:{
-            refreshToken:undefined
+        $unset:{
+            refreshToken:1
         }
     },{
         new:true
@@ -268,7 +268,7 @@ const getUserProfile = asyncHandler ( async(req,res) => {
         },
         {
             $lookup : {
-                from : "subscribers",
+                from : "subscriptions",
                 localField : "_id",
                 foreignField : "channel",
                 as:"subscribers"
@@ -277,7 +277,7 @@ const getUserProfile = asyncHandler ( async(req,res) => {
         },
         {
             $lookup : {
-                from : "subscribers",
+                from : "subscriptions",
                 localField : "_id",
                 foreignField : "subscriber",
                 as:"subcribedTo"
