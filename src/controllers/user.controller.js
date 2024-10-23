@@ -1,7 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/User.model.js"
-import {uploadToCloudinary} from '../utils/cloudinary.js'
+import {uploadOnCloudinary} from '../utils/cloudinary.js'
 import {ApiResponse} from '../utils/ApiResponse.js'
 import jwt from 'jsonwebtoken'
 
@@ -42,8 +42,8 @@ const registerUser = asyncHandler( async(req,res) =>{
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar is needed ")
     }
-    const avatarRes = await uploadToCloudinary(avatarLocalPath)
-    const coverImageRes = await uploadToCloudinary(coverImageLocalPath)
+    const avatarRes = await uploadOnCloudinary(avatarLocalPath)
+    const coverImageRes = await uploadOnCloudinary(coverImageLocalPath)
 
     if(!avatarRes){
         throw new ApiError(400,"Avatar is needed ")

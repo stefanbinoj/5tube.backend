@@ -8,8 +8,8 @@ import {registerUser,loginUser,logoutUser,refreshTokenEndpoint,
     getUserProfile,
     getWatchHistory
 } from '../controllers/user.controller.js'
-import {upload} from '../middleware/multer.middleware.js'
-import {verifyJWT} from '../middleware/auth.middleware.js'
+import {upload} from '../middlewares/multer.middleware.js'
+import {verifyJWT} from '../middlewares/auth.middleware.js'
 const router = Router()
 
 router.route("/register").post(
